@@ -155,8 +155,11 @@ static BOOL CtrlHandler(DWORD fdwCtrlType)
 	}
 }
 #endif /* HAVE_WINDOWS_H */
-
+#ifdef __LIBRETRO__ 
+int amain(int argc, char **argv)
+#else
 int main(int argc, char **argv)
+#endif
 {
 #if HAVE_WINDOWS_H
 	/* Handle Windows console signals myself. If not, then closing

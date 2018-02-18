@@ -146,6 +146,16 @@
 #include "win32\main.h"
 #endif
 
+#ifdef __LIBRETRO__
+#define LIBCO_C 
+#include "libco/libco.h"
+extern cothread_t mainThread;
+extern cothread_t emuThread;
+extern int pauseg;
+extern short signed int SNDBUF[1024*2];
+extern void retro_audiocb(signed short int *sound_buffer,int sndbufsize);
+#endif
+
 int Atari800_machine_type = Atari800_MACHINE_XLXE;
 
 int Atari800_builtin_basic = TRUE;
@@ -1081,6 +1091,11 @@ void Atari800_Sync(void)
 
 	if ((lasttime + deltatime) < curtime)
 		lasttime = curtime;
+#ifdef __LIBRETRO__
+	Sound_Callback( (unsigned char *)SNDBUF, 1024*4);
+	retro_audiocb(SNDBUF,Atari800_tv_mode==Atari800_TV_PAL?885:736);
+	co_switch(mainThread);
+#endif
 }
 
 #if defined(BASIC) || defined(VERY_SLOW) || defined(CURSES_BASIC)
@@ -1333,6 +1348,9 @@ void Atari800_Frame(void)
 #endif /* BASIC */
 	POKEY_Frame();
 #ifdef SOUND
+#ifdef __LIBRETRO__
+	if (!Atari800_turbo)
+#endif
 	Sound_Update();
 #endif
 	Atari800_nframes++;
@@ -1359,6 +1377,9 @@ void Atari800_Frame(void)
 				last_display_screen_time = cur_time;
 			else
 				Atari800_display_screen = FALSE;
+#ifdef __LIBRETRO__
+			co_switch(mainThread);
+#endif
 		}
 		else
 			Atari800_Sync();

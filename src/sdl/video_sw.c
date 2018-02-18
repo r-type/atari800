@@ -49,6 +49,13 @@
 #include "sdl/video.h"
 #include "sdl/video_sw.h"
 
+#ifdef __LIBRETRO__ 
+extern uint32_t *videoBuffer;
+extern int NEWGAME_FROM_OSD,retrow,retroh;
+int CURRENT_TV=Atari800_TV_PAL;
+extern void update_timing(int PALMODE);
+#endif 
+
 static int fullscreen = 1;
 
 int SDL_VIDEO_SW_bpp = 0;
@@ -182,6 +189,17 @@ static void SetVideoMode(int w, int h, int bpp)
 			exit(-1);
 		}
 	}
+#ifdef __LIBRETRO__ 
+	videoBuffer=(unsigned int *)SDL_VIDEO_screen->pixels;
+	printf("SDL screen obtain: %d x %d @ %d \n", SDL_VIDEO_screen->w, SDL_VIDEO_screen->h, SDL_VIDEO_screen->format->BitsPerPixel);
+	retrow=SDL_VIDEO_screen->w;
+	retroh=SDL_VIDEO_screen->h;
+	NEWGAME_FROM_OSD=2;
+	if(CURRENT_TV!=Atari800_tv_mode) {
+		CURRENT_TV=Atari800_tv_mode;
+		update_timing(Atari800_tv_mode==Atari800_TV_PAL);
+	}
+#endif
 	SDL_VIDEO_width = SDL_VIDEO_screen->w;
 	SDL_VIDEO_height = SDL_VIDEO_screen->h;
 	/* When vsync is off, set its availability to TRUE. Otherwise check if

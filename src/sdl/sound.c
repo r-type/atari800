@@ -36,6 +36,7 @@ static void SoundCallback(void *userdata, Uint8 *stream, int len)
 
 int PLATFORM_SoundSetup(Sound_setup_t *setup)
 {
+#ifndef __LIBRETRO__ 
 	SDL_AudioSpec desired;
 
 	if (Sound_enabled)
@@ -48,13 +49,15 @@ int PLATFORM_SoundSetup(Sound_setup_t *setup)
 	desired.freq = setup->freq;
 	desired.format = setup->sample_size == 2 ? AUDIO_S16SYS : AUDIO_U8;
 	desired.channels = setup->channels;
-
+#else
+	setup->buffer_frames =882;
+#endif
 	if (setup->buffer_frames == 0)
 		/* Set buffer_frames automatically. */
 		setup->buffer_frames = setup->freq / 50;
 
 	setup->buffer_frames = Sound_NextPow2(setup->buffer_frames);
-
+#ifndef __LIBRETRO__ 
 	desired.samples = setup->buffer_frames;
 	desired.callback = SoundCallback;
 	desired.userdata = NULL;
@@ -64,32 +67,42 @@ int PLATFORM_SoundSetup(Sound_setup_t *setup)
 		return FALSE;
 	}
 	setup->buffer_frames = desired.samples;
-
+#endif
 	return TRUE;
 }
 
 void PLATFORM_SoundExit(void)
 {
+#ifndef __LIBRETRO__ 
 	SDL_CloseAudio();
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+#endif
 }
 
 void PLATFORM_SoundPause(void)
 {
+#ifndef __LIBRETRO__ 
 	SDL_PauseAudio(1);
+#endif
 }
 
 void PLATFORM_SoundContinue(void)
 {
+#ifndef __LIBRETRO__ 
 	SDL_PauseAudio(0);
+#endif
 }
 
 void PLATFORM_SoundLock(void)
 {
+#ifndef __LIBRETRO__ 
 	SDL_LockAudio();
+#endif
 }
 
 void PLATFORM_SoundUnlock(void)
 {
+#ifndef __LIBRETRO__ 
 	SDL_UnlockAudio();
+#endif
 }

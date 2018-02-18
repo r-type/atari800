@@ -1,6 +1,7 @@
 **/CVS
 autom4te.cache/
 *.o
+*.so
 /src/Makefile
 /src/atari800
 /src/config.h
